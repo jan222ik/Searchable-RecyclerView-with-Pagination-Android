@@ -44,20 +44,18 @@ class ItemFragment : Fragment() {
         return view
     }
 
-    val sorts: List<String> = listOf("word", "freq", "id")
-    var indexSorts = 0
-    var latestFilter = MainViewModel.Filter("%%", sorts[indexSorts])
-
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         navController = Navigation.findNavController(view)
         viewModel = ViewModelProviders.of(activity!!).get(MainViewModel::class.java)
-        viewModel.filterTextAll.postValue(latestFilter)
+        viewModel.filterTextAll.postValue(viewModel.latestFilter)
         view.searchEditText.setOnEditorActionListener { _: TextView, actionId: Int, event: KeyEvent? ->
             if (event != null && event.keyCode == KeyEvent.KEYCODE_ENTER || actionId == EditorInfo.IME_ACTION_DONE) {
                 val search = view.searchEditText.text.toString()
-                latestFilter = MainViewModel.Filter("%$search%", latestFilter.sortBy)
-                viewModel.filterTextAll.postValue(latestFilter)
+                with(viewModel) {
+                    latestFilter = MainViewModel.Filter("%$search%", latestFilter.sortBy)
+                    filterTextAll.postValue(latestFilter)
+                }
                 Toast.makeText(activity!!, "Searching", Toast.LENGTH_SHORT).show()
                 true
             } else {
@@ -65,12 +63,14 @@ class ItemFragment : Fragment() {
             }
         }
         val sortByBtn = view.sortByBtn
-        sortByBtn.text = sorts[indexSorts]
+        sortByBtn.text = viewModel.sorts[viewModel.indexSorts]
         sortByBtn.setOnClickListener {
-            indexSorts = indexSorts.inc().rem(sorts.size)
-            latestFilter = MainViewModel.Filter(latestFilter.search, sorts[indexSorts])
-            viewModel.filterTextAll.postValue(latestFilter)
-            sortByBtn.text = sorts[indexSorts]
+            with(viewModel) {
+                indexSorts = indexSorts.inc().rem(sorts.size)
+                latestFilter = MainViewModel.Filter(latestFilter.search, sorts[indexSorts])
+                filterTextAll.postValue(latestFilter)
+                sortByBtn.text = sorts[indexSorts]
+            }
         }
         viewModel.init(EntityDatabase.getDatabase(activity!!, lifecycleScope).wordDAO())
         with(view.list as RecyclerView) {

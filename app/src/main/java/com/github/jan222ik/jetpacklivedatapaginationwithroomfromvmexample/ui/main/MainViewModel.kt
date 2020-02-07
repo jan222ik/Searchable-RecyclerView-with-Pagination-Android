@@ -11,6 +11,11 @@ import com.github.jan222ik.jetpacklivedatapaginationwithroomfromvmexample.WordDA
 
 
 class MainViewModel : ViewModel() {
+
+    val sorts: List<String> = listOf("word asc", "word desc", "freq asc", "freq desc", "id asc", "id desc")
+    var indexSorts = 0
+    var latestFilter = MainViewModel.Filter("%%", sorts[indexSorts])
+
     var allWords: LiveData<PagedList<Word>>? = null
     var filterTextAll = MutableLiveData<Filter>()
 

@@ -25,16 +25,10 @@ abstract class WordDAO {
 
     fun loadWords(search: String? = null, sortBy: String? = null): DataSource.Factory<Int?, Word> {
         var query = "SELECT * FROM Word"
-        var where = false
         if (search != null) {
-            where = true
             query += " WHERE word like ?"
         }
         if (sortBy != null) {
-            if (!where) {
-                where = true
-                query += " WHERE"
-            }
             query += " order by $sortBy"
         }
         return loadRaw(SimpleSQLiteQuery(query, arrayOf(search)))
